@@ -17,7 +17,7 @@ const saltRounds = 10;
 const {Pool} = pg;
 const db = new Pool({
     connectionString: process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false },
+    // ssl: { rejectUnauthorized: false },
 });
 db.connect();
 
