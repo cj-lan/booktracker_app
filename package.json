@@ -23,6 +23,7 @@
     "passport": "^0.7.0",
     "passport-local": "^1.0.0",
     "pg": "^8.13.3",
-    "pg-promise": "^11.10.2"
+    "pg-promise": "^11.10.2",
+    "supabase": "^2.15.8"
   }
 }

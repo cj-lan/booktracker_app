@@ -1,5 +1,5 @@
 import express from "express";
-import pgPromise from "pg-promise";
+import { Client } from "pg";
 import { fileURLToPath } from "url";
 import path from "path";
 import "dotenv/config";
@@ -13,7 +13,11 @@ const __dirname = path.dirname(__filename);
 app.set("view engine", "ejs");
 app.set("views", __dirname + "/views");
 
-const db = pgPromise("postgresql://postgres:J@yvee21@db.vegowjxekcygoechatsp.supabase.co:5432/postgres");
+const db = new Client({
+    connectionString: process.env.DATABASE_URL,
+});
+
+db.connect();
 
 app.get("/", async (req, res) => {
 
