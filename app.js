@@ -7,7 +7,6 @@ import passport from "passport";
 import {Strategy} from "passport-local";
 import { fileURLToPath } from "url";
 import path from "path";
-import pgSession from "connect-pg-simple";
 import "dotenv/config";
 
 const app = express();
@@ -17,25 +16,13 @@ const saltRounds = 10;
 // DATABASE CONNECTION TO SUPABASE
 const {Pool} = pg;
 const db = new Pool({
-    connectionString: process.env.DATABASE_URL,
+    connectionString: process.env.DATABASE_URL + "?sslmode=require",
     ssl: { rejectUnauthorized: false }, 
 });
-db.connect();
-
-app.use(session({
-    store: new (pgSession(session))({
-        db, // Reuse the pool
-        tableName: "session" // Default: "session"
-    }),
-    secret: process.env.SESSION_SECRET || "supersecret", // Change in production
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-        secure: process.env.NODE_ENV === "production", // Set to true in production
-        httpOnly: true,
-        maxAge: 1000 * 60 * 60 * 24, // 1 day
-    }
-}));
+db.connect((err) => {
+    if (err) throw err
+    console.log("Connect to PostgreSQL successfully!")
+});
 
 // SET EJS TEMPLATE
 const __filename = fileURLToPath(import.meta.url);
