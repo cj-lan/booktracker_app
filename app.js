@@ -16,7 +16,7 @@ const saltRounds = 10;
 // DATABASE CONNECTION TO SUPABASE
 const {Pool} = pg;
 const db = new Pool({
-    connectionString: process.env.DATABASE_URL + "?sslmode=require",
+    connectionString: process.env.DATABASE_URL,
     ssl: { rejectUnauthorized: false },
 });
 db.connect((err) => {
