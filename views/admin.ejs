@@ -1,135 +1,124 @@
 <%- include("partials/header.ejs") %>
 
-<div class="container my-2">
-    <div class="row">
-        <div class="col-md-6">
-            <h1>Managing Textbook</h1>
-            <h3>Distribution and Returns</h3>
-        </div>
-        <div class="col-md-6">
-            <div class="d-flex justify-content-end align-items-">
-                <h5>Welcome, <%= user.username %></h5>
+<div class="admin-background py-4">
+    <div class="container p-3 shadow-sm bg-white rounded">
+        <div class="row align-items-center">
+            <div class="col-12 col-md-6 text-center text-md-start">
+                <h2 class="display-6 fw-bold">Managing Textbooks</h2>
+                <p class="text-primary fs-5">Distribution and Returns</p>
+            </div>
+            <div class="col-12 col-md-6 text-center text-md-end">
+                <h5 class="text-muted">
+                    Welcome, <span class="badge bg-secondary fs-6"><%= user.username %></span>
+                </h5>
             </div>
         </div>
     </div>
-</div>
-
-<div class="container my-2">
-    <hr />
-    <form class="row" action="/submit" method="POST">
-        <div class="row">
-            <div class="col-md-6">
-                <div class="form-group">
-                    <label for="bookName" class="form-label">Book Name</label>
-                    <input type="text" name="bookName" class="form-control" id="bookName">
+    
+    <div class="container my-4">
+        <div class="p-4 shadow-sm bg-light rounded">
+            <form class="row g-3" action="/submitAdmin" method="POST">
+                <div class="col-md-6">
+                    <label for="bookName" class="form-label fw-bold">Book Name</label>
+                    <input type="text" name="bookName" class="form-control form-control-lg" id="bookName">
                 </div>
-                <div class="form-group">
-                    <label for="dateReceived" class="form-label">Date Received</label>
-                    <input type="date" name="dateReceived" class="form-control" id="dateReceived">
+                <div class="col-md-6">
+                    <label for="dateReceived" class="form-label fw-bold">Date Received</label>
+                    <input type="date" name="dateReceived" class="form-control form-control-lg" id="dateReceived">
                 </div>
-            </div>
-            <div class="col-md-6">
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="good" class="form-label">Good</label>
-                            <input type="number" name="good" class="form-control" id="good" oninput="calculateBooks()">
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="damage" class="form-label">Damage</label>
-                            <input type="number" name="damage" class="form-control" id="damage" oninput="calculateBooks()">
-                        </div>
-                    </div>
+                <div class="col-md-6">
+                    <label for="good" class="form-label fw-bold">Good</label>
+                    <input type="number" name="good" class="form-control form-control-lg" id="good" oninput="calculateBooks()">
                 </div>
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="form-group">
-                            <label for="total" class="form-label">Total</label>
-                            <input type="number" name="total" class="form-control" id="total" value="0" readonly>
-                        </div>
-                    </div>
+                <div class="col-md-6">
+                    <label for="damage" class="form-label fw-bold">Damage</label>
+                    <input type="number" name="damage" class="form-control form-control-lg" id="damage" oninput="calculateBooks()">
                 </div>
-            </div>
-            <div class="col-md-12">
-                <div class="d-flex justify-content-center mt-4">
-                    <button type="submit" class="btn btn-primary mt-auto">Submit</button>
+                <div class="col-md-12">
+                    <label for="total" class="form-label fw-bold">Total</label>
+                    <input type="number" name="total" class="form-control form-control-lg" id="total" value="0" readonly>
                 </div>
-            </div>
-        </div>
-    </form>
-</div>
-
-<div class="container">
-    <hr />
-</div>
-
-<div class="container my-4"> 
-    <div class="row">
-        <!-- IF ROLE IS ADMIN -->
-        <div class="col-md-1">
-            <button type="submit" class="btn btn-outline-primary" onclick="printTable();"> Print </button>
-        </div>
-        <div class="col-md-9">
-            <form method="GET" action="/searchadmin">
-                <div class="input-group mb-3">
-                    <input type="text" class="form-control" name="search" value="<%= searchTerm %>" placeholder="Search..">
-                    <div class="input-group-append">
-                        <button type="submit" class="btn btn-dark"> Search </button>
-                    </div>
+                <div class="col-12 d-flex justify-content-center mt-3">
+                    <button type="submit" class="btn btn-primary btn-lg px-4">Submit</button>
                 </div>
             </form>
         </div>
-        <div class="col-md-2">
-            <button type="submit" class="btn btn-outline-secondary w-100" disabled>
-                Reset
-            </button>
-        </div>
-
-        <!-- IF ROLE IS ADMIN -->
-        <% if (data.length > 0) { %>
-        <form action="update" method="POST">
-            <table class="table table-striped" id="bookTable">
-                <tr>
-                    <th>Book Name</th>
-                    <th>Date Received</th>
-                    <th>Good</th>
-                    <th>Damage</th>
-                    <th>Total</th>
-                    <th>Returned</th>
-                    <th class="exclude">Action</th>
-                </tr>
-                <% data.forEach(entry => { %>
-                    <tr>
-                        <td><%= entry.book_name %></td>
-                        <td><%= entry.date_received %></td>
-                        <td><%= entry.good %></td>
-                        <td><%= entry.damage %></td>
-                        <td><%= entry.total %></td>
-                        <td>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="checkbox_<%= entry.book_id %>" <%= entry.returned ? 'checked' :  "" %> />
-                            </div> 
-                        </td>
-                        <td class="exclude">
-                            <a href="/edit/<%= entry.book_id %>" class="btn btn-info">Edit</a>
-                            <a href="/delete/<%= entry.book_id %>" class="btn btn-danger">Delete</a>
-                        </td>
-                    </tr>
-                <% }); %>
-            </table>
-            <% } else { %>
-                <div class="alert alert-info">
-                    No results found..
-                </div>
-            <% } %>
-            <div class="d-flex justify-content-end">
-                <button type="submit" class="btn btn-primary">Save</button>
-            </div>
-        </form>
-
     </div>
+    
+    <div class="container my-4">
+        <div class="p-4 bg-light rounded shadow-sm">
+
+            <div class="row g-3 align-items-center mb-3">
+                <!-- SUCCESS AND ERROR ALERTS  -->
+                <% if (successMessage.length > 0) { %>
+                    <div class="message success"><%= successMessage %></div>
+                <% } %>
+                <% if (errorMessage.length > 0) { %>
+                    <div class="message error"><%= errorMessage %></div>
+                <% } %>
+            </div>
+
+            <div class="row g-3 align-items-center mb-3">
+                <div class="col-md-2 d-flex justify-content-md-start justify-content-center">
+                    <button type="button" class="btn btn-primary w-100 w-md-auto" onclick="printTable();">Print</button>
+                </div>
+                <div class="col-md-10">
+                    <form method="GET" action="/searchadmin">
+                        <div class="input-group">
+                            <input type="text" class="form-control form-control-lg" name="search" value="<%= searchTerm %>" placeholder="Search..">
+                            <button type="submit" class="btn btn-dark">Search</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <% if (data.length > 0) { %>
+            <form action="update" method="POST">
+                <div class="table-responsive shadow-sm rounded">
+                    <table class="table table-hover table-bordered text-center" id="bookTable">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Book Name</th>
+                                <th>Date Received</th>
+                                <th>Book Count</th>
+                                <th>Returned</th>
+                                <th class="exclude">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% data.forEach(entry => { %>
+                                <tr>
+                                    <td><%= entry.book_name %></td>
+                                    <td><%= entry.date_received %></td>
+                                    <td>
+                                        <div class="text-success small">Good: <span class="fw-bold"><%= entry.good %></span></div>
+                                        <div class="text-danger small">Damage: <span class="fw-bold"><%= entry.damage %></span></div>
+                                        <div class="fw-bold mt-1">Total: <span class="text-primary"><%= entry.total %></span></div>
+                                    </td>
+                                    <td>
+                                        <div class="form-check d-flex justify-content-center">
+                                            <input class="form-check-input" type="checkbox" name="checkbox_<%= entry.book_id %>" <%= entry.returned ? 'checked' : "" %> />
+                                        </div>
+                                    </td>
+                                    <td class="exclude">
+                                        <a href="/edit/<%= entry.book_id %>" class="btn btn-info btn-sm">Edit</a>
+                                        <a href="/delete/<%= entry.book_id %>" class="btn btn-danger btn-sm">Delete</a>
+                                    </td>
+                                </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="d-flex justify-content-end mt-3 mb-3">
+                    <button type="submit" class="btn btn-primary">Save Returned</button>
+                </div>
+            </form>
+            <% } else { %>
+            <div class="alert alert-info text-center p-3">No results found.</div>
+            <% } %>
+        </div>
+    </div>
+    
 </div>
 
 <%- include("partials/footer.ejs") %>

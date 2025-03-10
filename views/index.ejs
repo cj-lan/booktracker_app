@@ -9,19 +9,17 @@
     <title>Textbook Tracker</title>
 </head>
 <body>
-    <div class="container">
-        <div class="jumbotron centered">
-            <h1>Balingasa TextBook Tracker</h1>
-            <hr />
-            <a href="/login" class="btn btn-outline-secondary btn-lg" role="button">login</a>
-            <a href="/register" class="btn btn-dark btn-lg" role="button">register</a>
+    <div class="hero-section">
+        <div class="overlay">
+            <div class="container">
+                <h1 class="display-4 fw-bold">Balingasa TextBook Tracker</h1>
+                <hr class="bg-light mx-auto" style="width: 50px; height: 3px; opacity: 1;">
+                <div class="d-flex justify-content-center gap-3 mt-3">
+                    <a href="/login" class="btn btn-outline-light btn-lg">Login</a>
+                    <a href="/register" class="btn btn-light btn-lg text-dark">Register</a>
+                </div>
+            </div>
         </div>
     </div>
-
-    <footer class="fixed-bottom bg-dark text-white py-3 mt-5">
-        <div class="container text-center">
-            <p>Copyright © <%= new Date().getFullYear() %></p>
-        </div>
-    </footer>
 </body>
 </html>

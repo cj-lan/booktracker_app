@@ -7,6 +7,7 @@ import passport from "passport";
 import {Strategy} from "passport-local";
 import { fileURLToPath } from "url";
 import path from "path";
+import flash from "connect-flash";
 import "dotenv/config";
 
 const app = express();
@@ -45,6 +46,14 @@ app.use(session({
 }));
 app.use(passport.initialize());
 app.use(passport.session());
+
+app.use(flash());
+
+app.use((req, res, next) => {
+    res.locals.successMessage = req.flash("success");
+    res.locals.errorMessage = req.flash("error");
+    next();
+});
 
 // GET ROUTES
 app.get("/", (req, res) => {
@@ -187,9 +196,11 @@ app.get("/delete/:id", async (req, res) => {
 
     try {
         await db.query("DELETE FROM tracker WHERE book_id = $1", [bookId]);
+        req.flash("success", "Data deleted successfully");
         res.redirect("/admin");
     } catch (err) {
         console.log(err);
+        req.flash("error", err.message);
         res.status(500).send("Error Deleting Data");
     }
 });
@@ -217,9 +228,11 @@ app.post("/update", async(req, res) => {
                 await db.query("UPDATE tracker SET returned = $1 WHERE book_id = $2 ", [isChecked, recordID]);
             }
         }
+        req.flash("success", "Returned books updated successfully");
         res.redirect("/admin");
     } catch (err) {
         console.log("Error updating records", err);
+        req.flash("error", err.message);
         res.status(500).send("Server error");
     }
 });
@@ -262,7 +275,7 @@ app.post("/editBookUser/:id", async (req, res) => {
 
 
 
-// INSERT BOOKS - ADMIN AND USER
+// INSERT BOOKS - USER
 app.post("/submit", async (req, res) => {
     const bookName = req.body["bookName"];
     const dateReceived = req.body["dateReceived"];
@@ -276,13 +289,35 @@ app.post("/submit", async (req, res) => {
         await db.query("INSERT INTO tracker (book_name, date_received, good, damage, total, section_id, user_id) VALUES ($1, $2, $3, $4, $5, $6, $7)", [
             bookName, dateReceived, good, damage, total, sectionId, userId
         ]);
+        req.flash("success", "Book inserted successfully");
         res.redirect("/user");
     } catch (err) {
+        req.flash("error", err.message);
         res.send(err);
     }
 });
 
+// INSERT BOOKS - ADMIN
+app.post("/submitAdmin", async (req, res) => {
+    const bookName = req.body["bookName"];
+    const dateReceived = req.body["dateReceived"];
+    const good = req.body["good"];
+    const damage = req.body["damage"];
+    const total = req.body["total"];
+    const sectionId = req.user["section_id"];
+    const userId = 1;
 
+    try {
+        await db.query("INSERT INTO tracker (book_name, date_received, good, damage, total, section_id, user_id) VALUES ($1, $2, $3, $4, $5, $6, $7)", [
+            bookName, dateReceived, good, damage, total, sectionId, userId
+        ]);
+        req.flash("success", "Book Inserted successfully");
+        res.redirect("/admin");
+    } catch (err) {
+        req.flash("error", err.message);
+        res.send(err);
+    }
+});
 
 // REGISTER USER
 app.post("/register", async (req, res) => {
@@ -321,7 +356,7 @@ app.post("/register", async (req, res) => {
 // LOGIN
 app.post("/login", passport.authenticate("local", {
     successRedirect: "/dashboard",
-    failureRedirect: "/",
+    failureRedirect: "/login",
     failureFlash: true
 }), (req, res, next) => {
     console.log("User Authenticated");
@@ -330,7 +365,8 @@ app.post("/login", passport.authenticate("local", {
 
 app.get("/dashboard", async (req, res) => {
     if(!req.isAuthenticated()) {
-        res.redirect("/");
+        req.flash("error", "Something went wrong!");
+        res.redirect("/login");
     }
 
     try {
@@ -369,12 +405,12 @@ passport.use(new Strategy(async function verify(username, password, cb) {
                     if (result) {
                         return cb(null, user);
                     } else {
-                        return cb(null, false);
+                        return cb(null, false, { message: "Invalid password!" });
                     }
                 }
             });
         } else {
-            return cb("user not found");
+            return cb(null, false, { message: "user not found" });
         }
     } catch (err) {
         return cb(err);
